@@ -9,7 +9,7 @@ A Claude Code skill that transforms your workflow to use persistent markdown fil
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=OthmanAdi/planning-with-files&type=Date)](https://star-history.com/#OthmanAdi/planning-with-files&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=B0Qi/planning-with-files&type=Date)](https://star-history.com/#B0Qi/planning-with-files&Date)
 
 ---
 
@@ -30,27 +30,45 @@ Claude Code (and most AI agents) suffer from:
 - **Goal drift** — After 50+ tool calls, original goals get forgotten
 - **Hidden errors** — Failures aren't tracked, so the same mistakes repeat
 - **Context stuffing** — Everything crammed into context instead of stored
+- **Task confusion** — Multiple tasks use same files, causing conflicts
 
-## The Solution: 3-File Pattern
+## The Solution: Organized Task Directories
 
-For every complex task, create THREE files:
+All planning files live in `.claude-plans/` with per-task isolation:
 
 ```
-task_plan.md      → Track phases and progress
-notes.md          → Store research and findings
-[deliverable].md  → Final output
+.claude-plans/                    # Hidden directory, won't pollute project
+├── index.md                      # Task index (active + history)
+├── dark-mode-toggle/             # Task 1 directory
+│   ├── plan.md                   # Task plan
+│   ├── notes.md                  # Research notes
+│   └── deliverable.md            # Final output
+└── fix-login-bug/                # Task 2 directory
+    ├── plan.md
+    └── notes.md
 ```
+
+### The 3-File Pattern (Per Task)
+
+For every complex task, create THREE files in the task directory:
+
+| File | Purpose | When to Update |
+|------|---------|----------------|
+| `plan.md` | Track phases and progress | After each phase |
+| `notes.md` | Store findings and research | During research |
+| `deliverable.md` | Final output | At completion |
 
 ### The Loop
 
 ```
-1. Create task_plan.md with goal and phases
-2. Research → save to notes.md → update task_plan.md
-3. Read notes.md → create deliverable → update task_plan.md
-4. Deliver final output
+1. Check/create .claude-plans/index.md
+2. Create task directory with plan.md
+3. Research → save to notes.md → update plan.md
+4. Read notes.md → create deliverable → update plan.md
+5. Deliver final output → update index.md
 ```
 
-**Key insight:** By reading `task_plan.md` before each decision, goals stay in the attention window. This is how Manus handles ~50 tool calls without losing track.
+**Key insight:** By reading `plan.md` before each decision, goals stay in the attention window. This is how Manus handles ~50 tool calls without losing track.
 
 ## Installation
 
@@ -61,7 +79,7 @@ notes.md          → Store research and findings
 cd ~/.claude/skills  # or your custom skills path
 
 # Clone this skill
-git clone https://github.com/OthmanAdi/planning-with-files.git
+git clone git@github.com:B0Qi/planning-with-files.git
 ```
 
 ### Option 2: Manual installation
@@ -82,11 +100,13 @@ In Claude Code, the skill will automatically activate when you:
 
 Once installed, Claude will automatically:
 
-1. **Create `task_plan.md`** before starting complex tasks
-2. **Update progress** with checkboxes after each phase
-3. **Store findings** in `notes.md` instead of stuffing context
-4. **Log errors** for future reference
-5. **Re-read plan** before major decisions
+1. **Check `index.md`** to see existing tasks or create new
+2. **Create task directory** with `plan.md` for each new task
+3. **Update progress** with checkboxes after each phase
+4. **Store findings** in `notes.md` instead of stuffing context
+5. **Log errors** for future reference
+6. **Re-read plan** before major decisions
+7. **Update index** when switching or completing tasks
 
 ### Example
 
@@ -94,8 +114,23 @@ Once installed, Claude will automatically:
 
 **Claude creates:**
 
+`.claude-plans/index.md`:
 ```markdown
-# Task Plan: TypeScript Benefits Research
+# Task Index
+
+## Active Tasks
+
+| Task | Directory | Status | Started |
+|------|-----------|--------|---------|
+| TypeScript benefits research | `typescript-research/` | Phase 2/4 | 2025-01-09 |
+
+## Current Focus
+`typescript-research/` - Searching for sources
+```
+
+`.claude-plans/typescript-research/plan.md`:
+```markdown
+# Task: TypeScript Benefits Research
 
 ## Goal
 Create a research summary on TypeScript benefits.
@@ -110,7 +145,7 @@ Create a research summary on TypeScript benefits.
 **Currently in Phase 2** - Searching for sources
 ```
 
-Then continues through each phase, updating the file as it goes.
+Then continues through each phase, updating files as it goes.
 
 ## The Manus Principles
 
@@ -118,11 +153,12 @@ This skill implements these key context engineering principles:
 
 | Principle | Implementation |
 |-----------|----------------|
-| Filesystem as memory | Store in files, not context |
+| Filesystem as memory | Store in `.claude-plans/`, not context |
+| Task isolation | One directory per task |
 | Attention manipulation | Re-read plan before decisions |
 | Error persistence | Log failures in plan file |
 | Goal tracking | Checkboxes show progress |
-| Append-only context | Never modify history |
+| Context recovery | Read index.md after session reset |
 
 ## File Structure
 
@@ -141,6 +177,7 @@ planning-with-files/
 - Research tasks
 - Building/creating projects
 - Tasks spanning many tool calls
+- Multiple concurrent tasks
 - Anything requiring organization
 
 **Skip for:**
@@ -153,6 +190,7 @@ planning-with-files/
 - **Manus AI** — For pioneering context engineering patterns that made this possible
 - **Anthropic** — For Claude Code and the Agent Skills framework
 - Based on [Context Engineering for AI Agents](https://manus.im/de/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus)
+- Original skill by [Ahmad Othman Ammar Adi](https://github.com/OthmanAdi)
 
 ## Contributing
 
@@ -165,12 +203,6 @@ Contributions welcome! Please:
 
 MIT License — feel free to use, modify, and distribute.
 
-## Thank You
-
-To everyone who starred, forked, and shared this skill — thank you. This project blew up in less than 24 hours, and the support from the community has been incredible.
-
-If this skill helps you work smarter, that's all I wanted.
-
 ---
 
-**Author:** [Ahmad Othman Ammar Adi](https://github.com/OthmanAdi)
+**Maintainer:** [B0Qi](https://github.com/B0Qi)

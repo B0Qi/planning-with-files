@@ -2,6 +2,29 @@
 
 This skill is based on the context engineering principles from Manus, the AI agent company acquired by Meta for $2 billion in December 2025.
 
+## Directory Structure Rationale
+
+### Why `.claude-plans/`?
+
+1. **Hidden directory** - Won't clutter project file listings
+2. **Centralized location** - All planning in one place
+3. **Git-friendly** - Can choose to `.gitignore` or commit
+4. **Separation of concerns** - Planning files separate from project files
+
+### Why Per-Task Directories?
+
+1. **Isolation** - Multiple tasks don't interfere with each other
+2. **Context switching** - Easy to switch between tasks
+3. **History** - Completed tasks remain for reference
+4. **Clean structure** - Each task is self-contained
+
+### Why index.md?
+
+1. **Entry point** - Quick overview of all tasks
+2. **Current focus** - Know which task is active
+3. **Task history** - See completed work
+4. **Context recovery** - After session reset, read index first
+
 ## The 6 Manus Principles
 
 ### 1. Filesystem as External Memory
@@ -11,7 +34,7 @@ This skill is based on the context engineering principles from Manus, the AI age
 **Problem:** Context windows have limits. Stuffing everything in context degrades performance and increases costs.
 
 **Solution:** Treat the filesystem as unlimited memory:
-- Store large content in files
+- Store large content in files under `.claude-plans/[task]/`
 - Keep only paths in context
 - Agent can "look up" information when needed
 - Compression must be REVERSIBLE
@@ -20,11 +43,11 @@ This skill is based on the context engineering principles from Manus, the AI age
 
 **Problem:** After ~50 tool calls, models forget original goals ("lost in the middle" effect).
 
-**Solution:** Keep a `task_plan.md` file that gets RE-READ throughout execution:
+**Solution:** Keep a `plan.md` file that gets RE-READ throughout execution:
 ```
 Start of context: [Original goal - far away, forgotten]
 ...many tool calls...
-End of context: [Recently read task_plan.md - gets ATTENTION!]
+End of context: [Recently read plan.md - gets ATTENTION!]
 ```
 
 By reading the plan file before each decision, goals appear in the attention window.
@@ -80,12 +103,65 @@ Manus operates in a continuous loop:
 
 ### File Operations in the Loop:
 
-| Operation | When to Use |
-|-----------|-------------|
-| `write` | New files or complete rewrites |
-| `append` | Adding sections incrementally |
-| `edit` | Updating specific parts (checkboxes, status) |
-| `read` | Reviewing before decisions |
+| Operation | When to Use | Path |
+|-----------|-------------|------|
+| `write` | New files or complete rewrites | `.claude-plans/[task]/` |
+| `append` | Adding sections incrementally | `.claude-plans/[task]/notes.md` |
+| `edit` | Updating specific parts (checkboxes, status) | `.claude-plans/[task]/plan.md` |
+| `read` | Reviewing before decisions | `.claude-plans/[task]/plan.md` |
+
+## Task Lifecycle
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  1. START NEW TASK                                          │
+│     Read .claude-plans/index.md                             │
+│     Create .claude-plans/[task-slug]/plan.md                │
+│     Update index.md with new task                           │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│  2. WORK ON TASK                                            │
+│     Read plan.md before each decision                       │
+│     Store research in notes.md                              │
+│     Update plan.md after each phase                         │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│  3. COMPLETE TASK                                           │
+│     Create deliverable.md                                   │
+│     Update index.md (move to Completed)                     │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│  4. SWITCH TASK (if needed)                                 │
+│     Read index.md                                           │
+│     Read .claude-plans/[other-task]/plan.md                 │
+│     Update index.md "Current Focus"                         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Context Recovery After Session Reset
+
+When starting a new session:
+
+```bash
+# 1. Check if plans exist
+Read .claude-plans/index.md
+
+# 2. See current focus
+# Index tells you which task was active
+
+# 3. Resume that task
+Read .claude-plans/[active-task]/plan.md
+
+# 4. Continue from last status
+```
+
+This is why the directory structure matters - it survives session resets!
 
 ## Manus Statistics
 

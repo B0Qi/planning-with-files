@@ -11,53 +11,114 @@ Work like Manus: Use persistent markdown files as your "working memory on disk."
 
 Before ANY complex task:
 
-1. **Create `task_plan.md`** in the working directory
-2. **Define phases** with checkboxes
-3. **Update after each phase** - mark [x] and change status
-4. **Read before deciding** - refresh goals in attention window
+1. **Check `.claude-plans/index.md`** - see existing tasks or create new
+2. **Create task directory** under `.claude-plans/[task-slug]/`
+3. **Create `plan.md`** with goal and phases
+4. **Update after each phase** - mark [x] and change status
+5. **Read before deciding** - refresh goals in attention window
 
-## The 3-File Pattern
+## Directory Structure
 
-For every non-trivial task, create THREE files:
+All planning files live in `.claude-plans/` (hidden, won't pollute project):
+
+```
+.claude-plans/
+├── index.md                      # Task index (active + history)
+├── dark-mode-toggle/             # Task 1 directory
+│   ├── plan.md                   # Task plan
+│   ├── notes.md                  # Research notes
+│   └── deliverable.md            # Final output
+└── fix-login-bug/                # Task 2 directory
+    ├── plan.md
+    └── notes.md
+```
+
+## The 3-File Pattern (Per Task)
+
+For every non-trivial task, create THREE files in the task directory:
 
 | File | Purpose | When to Update |
 |------|---------|----------------|
-| `task_plan.md` | Track phases and progress | After each phase |
+| `plan.md` | Track phases and progress | After each phase |
 | `notes.md` | Store findings and research | During research |
-| `[deliverable].md` | Final output | At completion |
+| `deliverable.md` | Final output | At completion |
 
 ## Core Workflow
 
 ```
-Loop 1: Create task_plan.md with goal and phases
-Loop 2: Research → save to notes.md → update task_plan.md
-Loop 3: Read notes.md → create deliverable → update task_plan.md
-Loop 4: Deliver final output
+Loop 1: Create/update index.md → create task directory → create plan.md
+Loop 2: Research → save to notes.md → update plan.md
+Loop 3: Read notes.md → create deliverable → update plan.md
+Loop 4: Deliver final output → update index.md (mark complete)
+```
+
+### Starting a New Task
+
+```bash
+# 1. Check or create index
+Read .claude-plans/index.md       # If exists
+# OR
+Write .claude-plans/index.md      # If first task
+
+# 2. Create task directory and plan
+Write .claude-plans/[task-slug]/plan.md
+
+# 3. Update index with new task
+Edit .claude-plans/index.md
 ```
 
 ### The Loop in Detail
 
 **Before each major action:**
 ```bash
-Read task_plan.md  # Refresh goals in attention window
+Read .claude-plans/[task-slug]/plan.md  # Refresh goals in attention window
 ```
 
 **After each phase:**
 ```bash
-Edit task_plan.md  # Mark [x], update status
+Edit .claude-plans/[task-slug]/plan.md  # Mark [x], update status
 ```
 
 **When storing information:**
 ```bash
-Write notes.md     # Don't stuff context, store in file
+Write .claude-plans/[task-slug]/notes.md  # Don't stuff context, store in file
 ```
 
-## task_plan.md Template
+**When completing a task:**
+```bash
+Edit .claude-plans/index.md  # Move task to completed section
+```
 
-Create this file FIRST for any complex task:
+## index.md Template
+
+Create this file FIRST in `.claude-plans/`:
 
 ```markdown
-# Task Plan: [Brief Description]
+# Task Index
+
+## Active Tasks
+
+| Task | Directory | Status | Started |
+|------|-----------|--------|---------|
+| Add dark mode toggle | `dark-mode-toggle/` | Phase 2/4 | 2025-01-08 |
+| Fix login bug | `fix-login-bug/` | Phase 1/3 | 2025-01-09 |
+
+## Current Focus
+`dark-mode-toggle/` - Implementing toggle component
+
+## Completed Tasks
+
+| Task | Directory | Completed |
+|------|-----------|-----------|
+| Refactor auth module | `refactor-auth/` | 2025-01-07 |
+```
+
+## plan.md Template
+
+Create this file in each task directory:
+
+```markdown
+# Task: [Brief Description]
 
 ## Goal
 [One sentence describing the end state]
@@ -106,23 +167,44 @@ For research and findings:
 
 ## Critical Rules
 
-### 1. ALWAYS Create Plan First
-Never start a complex task without `task_plan.md`. This is non-negotiable.
+### 1. Use .claude-plans/ Directory
+All planning files go in `.claude-plans/`. Never pollute project root with plan files.
 
-### 2. Read Before Decide
+### 2. One Directory Per Task
+Each task gets its own subdirectory with a descriptive slug (e.g., `fix-login-bug/`, `add-dark-mode/`).
+
+### 3. Maintain index.md
+Always update the index when starting or completing tasks. This is your entry point.
+
+### 4. Read Before Decide
 Before any major decision, read the plan file. This keeps goals in your attention window.
 
-### 3. Update After Act
+### 5. Update After Act
 After completing any phase, immediately update the plan file:
 - Mark completed phases with [x]
 - Update the Status section
 - Log any errors encountered
 
-### 4. Store, Don't Stuff
+### 6. Store, Don't Stuff
 Large outputs go to files, not context. Keep only paths in working memory.
 
-### 5. Log All Errors
+### 7. Log All Errors
 Every error goes in the "Errors Encountered" section. This builds knowledge for future tasks.
+
+## Switching Between Tasks
+
+When user switches context or asks about a different task:
+
+```bash
+# 1. Read index to see all tasks
+Read .claude-plans/index.md
+
+# 2. Switch to the relevant task
+Read .claude-plans/[other-task]/plan.md
+
+# 3. Update index's "Current Focus"
+Edit .claude-plans/index.md
+```
 
 ## When to Use This Pattern
 
@@ -142,7 +224,10 @@ Every error goes in the "Errors Encountered" section. This builds knowledge for 
 
 | Don't | Do Instead |
 |-------|------------|
-| Use TodoWrite for persistence | Create `task_plan.md` file |
+| Put plan files in project root | Use `.claude-plans/` directory |
+| Use same file for all tasks | Create subdirectory per task |
+| Forget to update index.md | Always maintain the index |
+| Use TodoWrite for persistence | Create plan files |
 | State goals once and forget | Re-read plan before each decision |
 | Hide errors and retry | Log errors to plan file |
 | Stuff everything in context | Store large content in files |
