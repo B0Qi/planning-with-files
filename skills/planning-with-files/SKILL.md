@@ -12,7 +12,7 @@ hooks:
   Stop:
     - hooks:
         - type: command
-          command: "PLAN_FILE=\"task_plan.md\"; [ ! -f \"$PLAN_FILE\" ] && exit 0; TOTAL=$(grep -c '### Phase' \"$PLAN_FILE\" 2>/dev/null || echo 0); COMPLETE=$(grep -cF '**Status:** complete' \"$PLAN_FILE\" 2>/dev/null || echo 0); IN_PROGRESS=$(grep -cF '**Status:** in_progress' \"$PLAN_FILE\" 2>/dev/null || echo 0); PENDING=$(grep -cF '**Status:** pending' \"$PLAN_FILE\" 2>/dev/null || echo 0); echo '=== Task Completion Check ==='; echo \"Total phases: $TOTAL\"; echo \"Complete: $COMPLETE\"; echo \"In progress: $IN_PROGRESS\"; echo \"Pending: $PENDING\"; [ \"$COMPLETE\" -eq \"$TOTAL\" ] && [ \"$TOTAL\" -gt 0 ] && echo 'ALL PHASES COMPLETE' && exit 0; echo 'TASK NOT COMPLETE - Do not stop until all phases are complete.'; exit 1"
+          command: "PLAN_FILE=\"task_plan.md\"; [ ! -f \"$PLAN_FILE\" ] && exit 0; TOTAL=$(grep -c '### Phase' \"$PLAN_FILE\" 2>/dev/null || echo 0); COMPLETE=$(grep -cF '**Status:** complete' \"$PLAN_FILE\" 2>/dev/null || echo 0); IN_PROGRESS=$(grep -cF '**Status:** in_progress' \"$PLAN_FILE\" 2>/dev/null || echo 0); PENDING=$(grep -cF '**Status:** pending' \"$PLAN_FILE\" 2>/dev/null || echo 0); echo '=== Task Completion Check ==='; echo \"Phases: $COMPLETE/$TOTAL complete\"; [ \"$COMPLETE\" -eq \"$TOTAL\" ] && [ \"$TOTAL\" -gt 0 ] && echo 'ALL PHASES COMPLETE' || echo \"TASK NOT COMPLETE - $IN_PROGRESS in progress, $PENDING pending\"; exit 0"
 ---
 
 # Planning with Files
