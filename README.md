@@ -16,14 +16,49 @@ A Claude Code plugin that transforms your workflow to use persistent markdown fi
 
 ---
 
-## Quick Install
+## Installation
+
+### Method 1: Global Skills Installation (Recommended)
+
+Install the skill globally so it's available in all projects:
 
 ```bash
+# Clone the repository
+git clone git@github.com:B0Qi/planning-with-files.git
+
+# Copy skill to global skills directory
+cp -r planning-with-files/skills/planning-with-files ~/.claude/skills/
+
+# Verify installation
+ls ~/.claude/skills/planning-with-files/SKILL.md
+```
+
+### Method 2: Project Plugin Installation
+
+Install as a plugin for a specific project:
+
+```bash
+# In your project directory
 mkdir -p .claude/plugins
 git clone git@github.com:B0Qi/planning-with-files.git .claude/plugins/planning-with-files
 ```
 
-See [docs/installation.md](docs/installation.md) for all installation methods.
+### Method 3: Cursor Installation
+
+```bash
+git clone git@github.com:B0Qi/planning-with-files.git
+cp -r planning-with-files/.cursor .cursor
+```
+
+> **Note:** Hooks are Claude Code specific and won't work in Cursor.
+
+### After Installation
+
+Restart Claude Code. The skill will:
+- **Auto-activate** when starting complex tasks (>5 tool calls)
+- **Manual invoke** with `/planning-with-files`
+
+See [docs/installation.md](docs/installation.md) for more details.
 
 ## Documentation
 
