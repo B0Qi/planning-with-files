@@ -2,17 +2,35 @@
 name: planning-with-files
 version: "2.1.0"
 description: Implements Manus-style file-based planning with multi-task support. Uses .claude-plans/ directory with per-task isolation. Use when starting complex multi-step tasks, research projects, or any task requiring >5 tool calls.
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
+user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Glob
+  - Grep
+  - WebFetch
+  - WebSearch
 hooks:
+  SessionStart:
+    - hooks:
+        - type: command
+          command: "echo '[planning-with-files] Ready. Auto-activates for complex tasks, or invoke manually with /planning-with-files'"
   PreToolUse:
     - matcher: "Write|Edit|Bash"
       hooks:
         - type: command
           command: "cat .claude-plans/index.md 2>/dev/null | head -20 || true"
+  PostToolUse:
+    - matcher: "Write|Edit"
+      hooks:
+        - type: command
+          command: "echo '[planning-with-files] File updated. If this completes a phase, update plan.md status in .claude-plans/'"
   Stop:
     - hooks:
         - type: command
-          command: "PLAN_FILE=\"task_plan.md\"; [ ! -f \"$PLAN_FILE\" ] && exit 0; TOTAL=$(grep -c '### Phase' \"$PLAN_FILE\" 2>/dev/null || echo 0); COMPLETE=$(grep -cF '**Status:** complete' \"$PLAN_FILE\" 2>/dev/null || echo 0); IN_PROGRESS=$(grep -cF '**Status:** in_progress' \"$PLAN_FILE\" 2>/dev/null || echo 0); PENDING=$(grep -cF '**Status:** pending' \"$PLAN_FILE\" 2>/dev/null || echo 0); echo '=== Task Completion Check ==='; echo \"Phases: $COMPLETE/$TOTAL complete\"; [ \"$COMPLETE\" -eq \"$TOTAL\" ] && [ \"$TOTAL\" -gt 0 ] && echo 'ALL PHASES COMPLETE' || echo \"TASK NOT COMPLETE - $IN_PROGRESS in progress, $PENDING pending\"; exit 0"
+          command: "PLAN_FILE=\".claude-plans/index.md\"; [ ! -f \"$PLAN_FILE\" ] && exit 0; echo '=== Task Index ==='; cat \"$PLAN_FILE\" | head -20; exit 0"
 ---
 
 # Planning with Files
@@ -46,6 +64,8 @@ Before ANY complex task:
 4. **Re-read plan before decisions** — Refreshes goals in attention window
 5. **Update after each phase** — Mark complete, log errors
 6. **Update index.md** — When switching or completing tasks
+
+Or invoke manually with `/planning-with-files`.
 
 ## The Core Pattern
 

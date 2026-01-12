@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2.1.0] - 2026-01-09
+## [2.1.0] - 2026-01-09 (B0Qi Fork)
 
 ### Added
 
@@ -23,9 +23,13 @@ All notable changes to this project will be documented in this file.
   - Read index → Switch task → Update focus
   - Context recovery after session reset
 
-- **Updated Hooks**
+- **New Hooks from Upstream**
+  - SessionStart hook: Notifies user when skill is loaded
+  - PostToolUse hook: Reminds to update plan.md after Write/Edit
   - PreToolUse hook now reads `index.md` for task awareness
-  - Better multi-task context management
+
+- **`user-invocable: true`**
+  - Skill appears in slash command menu as `/planning-with-files`
 
 ### Changed
 
@@ -34,11 +38,46 @@ All notable changes to this project will be documented in this file.
 - File structure: `progress.md` → `.claude-plans/[task]/progress.md`
 - Version bumped to 2.1.0
 
+### Merged from Upstream (OthmanAdi)
+
+- Documentation restructure with `docs/` folder
+- Root-level `templates/` and `scripts/` for CLAUDE_PLUGIN_ROOT resolution
+- `planning-with-files/` folder for plugin marketplace compatibility
+- Cursor and Windows setup guides
+
 ### Preserved
 
 - All v2.0.0 features (hooks, templates, scripts, 2-Action Rule, 3-Strike Protocol)
 - Core 3-file pattern per task
 - Cursor support
+
+---
+
+## Upstream Changes (OthmanAdi/planning-with-files)
+
+### [2.1.2] - 2026-01-11
+
+- Fixed template files not found in cache (Issue #18)
+- Added `templates/` and `scripts/` at repo root level
+
+### [2.1.1] - 2026-01-10
+
+- Fixed plugin template path issue (Issue #15)
+- Added `planning-with-files/` folder at root for plugin installs
+
+### [2.1.0] - 2026-01-10
+
+- Claude Code v2.1 compatibility
+- `user-invocable: true` frontmatter
+- SessionStart and PostToolUse hooks
+- YAML list format for `allowed-tools`
+
+### [2.0.1] - 2026-01-09
+
+- Planning files now correctly created in project directory
+- Added "Important: Where Files Go" section
+
+---
 
 ## [2.0.0] - 2026-01-08
 

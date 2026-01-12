@@ -2,7 +2,7 @@
 
 > **Work like Manus** — the AI agent company Meta acquired for **$2 billion**.
 
-A Claude Code plugin containing an [Agent Skill](https://code.claude.com/docs/en/skills) that transforms your workflow to use persistent markdown files for planning, progress tracking, and knowledge storage — the exact pattern that made Manus worth billions.
+A Claude Code plugin that transforms your workflow to use persistent markdown files for planning, progress tracking, and knowledge storage — the exact pattern that made Manus worth billions.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blue)](https://code.claude.com/docs/en/plugins)
@@ -16,22 +16,39 @@ A Claude Code plugin containing an [Agent Skill](https://code.claude.com/docs/en
 
 ---
 
-## What's New in v2.1.0
+## Quick Install
 
-- **Multi-Task Support** — `.claude-plans/` directory with per-task isolation
-- **Task Index** — `index.md` tracks all active and completed tasks
-- **Task Switching** — Seamlessly switch between multiple concurrent tasks
-- **Hooks Integration** — Automatic plan re-reading and completion verification
-- **Templates & Scripts** — Structured templates and helper scripts
-- **Enhanced Documentation** — 2-Action Rule, 3-Strike Protocol, 5-Question Reboot Test
+```bash
+mkdir -p .claude/plugins
+git clone git@github.com:B0Qi/planning-with-files.git .claude/plugins/planning-with-files
+```
+
+See [docs/installation.md](docs/installation.md) for all installation methods.
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Installation Guide](docs/installation.md) | All installation methods (plugin, manual, Cursor, Windows) |
+| [Quick Start](docs/quickstart.md) | 5-step guide to using the pattern |
+| [Workflow Diagram](docs/workflow.md) | Visual diagram of how files and hooks interact |
+| [Troubleshooting](docs/troubleshooting.md) | Common issues and solutions |
+| [Cursor Setup](docs/cursor.md) | Cursor IDE-specific instructions |
+| [Windows Setup](docs/windows.md) | Windows-specific notes |
+
+## Versions
+
+| Version | Features | Install |
+|---------|----------|---------|
+| **v2.1.0** (current) | Multi-task support, `.claude-plans/` directory, task index | `git clone git@github.com:B0Qi/planning-with-files.git` |
+| **v2.0.x** | Hooks, templates, scripts | See upstream |
+| **v1.0.0** (legacy) | Core 3-file pattern | `git clone -b legacy` |
 
 See [CHANGELOG.md](CHANGELOG.md) for details.
 
 ## Why This Skill?
 
 On December 29, 2025, [Meta acquired Manus for $2 billion](https://techcrunch.com/2025/12/29/meta-just-bought-manus-an-ai-startup-everyone-has-been-talking-about/). In just 8 months, Manus went from launch to $100M+ revenue. Their secret? **Context engineering**.
-
-This skill implements Manus's core workflow pattern:
 
 > "Markdown is my 'working memory' on disk. Since I process information iteratively and my active context has limits, Markdown files serve as scratch pads for notes, checkpoints for progress, building blocks for final deliverables."
 > — Manus AI
@@ -65,8 +82,6 @@ All planning files live in `.claude-plans/` with per-task isolation:
 
 ### The 3-File Pattern (Per Task)
 
-For every complex task, create THREE files in the task directory:
-
 | File | Purpose | When to Update |
 |------|---------|----------------|
 | `plan.md` | Track phases and progress | After each phase |
@@ -84,114 +99,23 @@ Filesystem = Disk (persistent, unlimited)
 
 **Key insight:** By reading `plan.md` before each decision, goals stay in the attention window. This is how Manus handles ~50 tool calls without losing track.
 
-<details>
-<summary><strong>Workflow Diagram</strong> (click to expand)</summary>
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    TASK START                                    │
-│  User requests a complex task (>5 tool calls expected)          │
-└────────────────────────┬────────────────────────────────────────┘
-                         │
-                         ▼
-         ┌───────────────────────────────┐
-         │  Check .claude-plans/index.md  │
-         │  Create task directory         │
-         └───────────────┬───────────────┘
-                         │
-                         ▼
-         ┌───────────────────────────────┐
-         │  Create plan.md, findings.md,  │
-         │  progress.md in task directory │
-         └───────────────┬───────────────┘
-                         │
-                         ▼
-    ┌────────────────────────────────────────────┐
-    │         WORK LOOP (Iterative)              │
-    │                                            │
-    │  ┌──────────────────────────────────────┐ │
-    │  │  PreToolUse Hook (Automatic)         │ │
-    │  │  → Reads index.md before            │ │
-    │  │    Write/Edit/Bash operations       │ │
-    │  └──────────────┬───────────────────────┘ │
-    │                 │                          │
-    │                 ▼                          │
-    │  ┌──────────────────────────────────────┐ │
-    │  │  Perform work (tool calls)          │ │
-    │  │  - Research → Update findings.md    │ │
-    │  │  - Implement → Update progress.md    │ │
-    │  └──────────────┬───────────────────────┘ │
-    │                 │                          │
-    │                 ▼                          │
-    │  ┌──────────────────────────────────────┐ │
-    │  │  After completing a phase:            │ │
-    │  │  → Update plan.md status             │ │
-    │  │  → Update index.md if needed         │ │
-    │  └──────────────┬───────────────────────┘ │
-    │                 │                          │
-    │                 └──────────┐               │
-    │                            │               │
-    │              ┌─────────────▼────────┐     │
-    │              │  More work to do?    │     │
-    │              └──────┬───────────────┘     │
-    │              YES ───┘                     │
-    └─────────────────────────────────────────┘
-                         │
-                        NO
-                         │
-                         ▼
-         ┌──────────────────────────────────────┐
-         │  Update index.md (mark complete)     │
-         │  Deliver final output                │
-         └──────────────────────────────────────┘
-```
-
-</details>
-
-## Installation
-
-### As a Claude Code Plugin (Recommended)
-
-Clone into your project's `.claude/plugins/` directory:
-
-```bash
-mkdir -p .claude/plugins
-git clone git@github.com:B0Qi/planning-with-files.git .claude/plugins/planning-with-files
-```
-
-### Global Skills Installation
-
-Copy the `skills/` directory contents into your `.claude/skills/` folder:
-
-```bash
-git clone git@github.com:B0Qi/planning-with-files.git
-cp -r planning-with-files/skills/* ~/.claude/skills/
-```
-
-### Cursor Installation
-
-Copy the `.cursor/rules/` directory into your project:
-
-```bash
-git clone git@github.com:B0Qi/planning-with-files.git
-cp -r planning-with-files/.cursor .cursor
-```
-
-> **Note:** Hooks (PreToolUse, Stop) are Claude Code specific and won't work in Cursor. The core planning workflow still applies.
-
 ## Usage
 
 Once installed, Claude will automatically:
 
 1. **Check `.claude-plans/index.md`** to see existing tasks or create new
 2. **Create task directory** with `plan.md` for each new task
-3. **Re-read plan** before major decisions (via hooks)
-4. **Update progress** with checkboxes after each phase
+3. **Re-read plan** before major decisions (via PreToolUse hook)
+4. **Remind you** to update status after file writes (via PostToolUse hook)
 5. **Store findings** in `findings.md` instead of stuffing context
 6. **Log errors** for future reference
 7. **Update index** when switching or completing tasks
 
-### Key Rules
+Or invoke manually with `/planning-with-files`.
+
+See [docs/quickstart.md](docs/quickstart.md) for the full 5-step guide.
+
+## Key Rules
 
 1. **Use .claude-plans/ Directory** — All planning files go there
 2. **One Directory Per Task** — No file conflicts between tasks
@@ -199,63 +123,39 @@ Once installed, Claude will automatically:
 4. **The 2-Action Rule** — Save findings after every 2 view/browser operations
 5. **Log ALL Errors** — They help avoid repetition
 
-### Example
+## File Structure
 
-**You:** "Research the benefits of TypeScript and write a summary"
-
-**Claude creates:**
-
-`.claude-plans/index.md`:
-```markdown
-# Task Index
-
-## Active Tasks
-
-| Task | Directory | Status | Started |
-|------|-----------|--------|---------|
-| TypeScript benefits research | `typescript-research/` | Phase 2/4 | 2025-01-09 |
-
-## Current Focus
-`typescript-research/` - Searching for sources
 ```
-
-`.claude-plans/typescript-research/plan.md`:
-```markdown
-# Task: TypeScript Benefits Research
-
-## Goal
-Create a research summary on TypeScript benefits.
-
-## Phases
-- [x] Phase 1: Create plan
-- [ ] Phase 2: Research and gather sources (CURRENT)
-- [ ] Phase 3: Synthesize findings
-- [ ] Phase 4: Deliver summary
-
-## Status
-**Currently in Phase 2** - Searching for sources
-```
-
-Then continues through each phase, updating files as it goes.
-
-### Switching Between Tasks
-
-When you need to work on a different task:
-
-```bash
-# Claude reads index to see all tasks
-Read .claude-plans/index.md
-
-# Switches to the other task
-Read .claude-plans/fix-login-bug/plan.md
-
-# Updates index's Current Focus
-Edit .claude-plans/index.md
+planning-with-files/
+├── templates/               # Root-level templates (for CLAUDE_PLUGIN_ROOT)
+├── scripts/                 # Root-level scripts (for CLAUDE_PLUGIN_ROOT)
+├── docs/                    # Documentation
+│   ├── installation.md
+│   ├── quickstart.md
+│   ├── workflow.md
+│   ├── troubleshooting.md
+│   ├── cursor.md
+│   └── windows.md
+├── planning-with-files/     # Plugin skill folder
+│   ├── SKILL.md
+│   ├── templates/
+│   └── scripts/
+├── skills/                  # Skills folder (with multi-task support)
+│   └── planning-with-files/
+│       ├── SKILL.md
+│       ├── reference.md
+│       ├── examples.md
+│       ├── templates/
+│       └── scripts/
+├── .claude-plugin/          # Plugin manifest
+├── .cursor/                 # Cursor rules
+├── CHANGELOG.md
+├── MIGRATION.md
+├── LICENSE
+└── README.md
 ```
 
 ## The Manus Principles
-
-This skill implements these key context engineering principles:
 
 | Principle | Implementation |
 |-----------|----------------|
@@ -266,35 +166,6 @@ This skill implements these key context engineering principles:
 | Goal tracking | Checkboxes show progress |
 | Context recovery | Read index.md after session reset |
 
-## File Structure
-
-```
-planning-with-files/
-├── .claude-plugin/
-│   ├── plugin.json          # Plugin manifest
-│   └── marketplace.json     # Marketplace listing
-├── .cursor/
-│   └── rules/
-│       └── planning-with-files.mdc  # Cursor rules file
-├── skills/
-│   └── planning-with-files/
-│       ├── SKILL.md         # Main skill definition
-│       ├── reference.md     # Manus principles
-│       ├── examples.md      # Usage examples
-│       ├── templates/       # File templates
-│       │   ├── task_plan.md
-│       │   ├── findings.md
-│       │   └── progress.md
-│       └── scripts/         # Helper scripts
-│           ├── init-session.sh
-│           └── check-complete.sh
-├── examples/                # Extended examples
-├── CHANGELOG.md             # Version history
-├── MIGRATION.md             # Upgrade guide
-├── LICENSE
-└── README.md
-```
-
 ## When to Use
 
 **Use this pattern for:**
@@ -303,7 +174,6 @@ planning-with-files/
 - Building/creating projects
 - Tasks spanning many tool calls
 - Multiple concurrent tasks
-- Anything requiring organization
 
 **Skip for:**
 - Simple questions
@@ -312,11 +182,9 @@ planning-with-files/
 
 ## Community Forks
 
-Extensions built by the community:
-
 | Fork | Author | Features |
 |------|--------|----------|
-| [multi-manus-planning](https://github.com/kmichels/multi-manus-planning) | [@kmichels](https://github.com/kmichels) | Multi-project support, separate planning/source paths, SessionStart git sync |
+| [multi-manus-planning](https://github.com/kmichels/multi-manus-planning) | [@kmichels](https://github.com/kmichels) | Multi-project support, SessionStart git sync |
 
 *Built something? Open an issue to get listed!*
 
