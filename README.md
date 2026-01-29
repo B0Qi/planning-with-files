@@ -21,38 +21,51 @@ A Claude Code plugin that transforms your workflow to use persistent markdown fi
 [![Moltbot](https://img.shields.io/badge/Moltbot-Skills-FF6B6B)](https://docs.molt.bot/tools/skills)
 [![Kiro](https://img.shields.io/badge/Kiro-Steering-00D4AA)](https://kiro.dev/docs/cli/steering/)
 [![AdaL CLI](https://img.shields.io/badge/AdaL%20CLI-Skills-9B59B6)](https://docs.sylph.ai/features/plugins-and-skills)
-[![Version](https://img.shields.io/badge/version-2.13.0-brightgreen)](https://github.com/OthmanAdi/planning-with-files/releases)
+[![Version](https://img.shields.io/badge/version-2.13.0-brightgreen)](https://github.com/B0Qi/planning-with-files/releases)
 [![SkillCheck Validated](https://img.shields.io/badge/SkillCheck-Validated-4c1)](https://getskillcheck.com)
 
 ## Quick Install
 
+### Method 1: Global Skills Installation (Recommended)
+
+This fork adds **multi-task support** with `.claude-plans/` directory structure.
+
 ```bash
-# Install the plugin
+# Clone the repository
+git clone git@github.com:B0Qi/planning-with-files.git
+
+# Copy skill to global skills directory
+cp -r planning-with-files/skills/planning-with-files ~/.claude/skills/
+
+# Verify installation
+ls ~/.claude/skills/planning-with-files/SKILL.md
+```
+
+### Method 2: Project Plugin Installation
+
+```bash
+mkdir -p .claude/plugins
+git clone git@github.com:B0Qi/planning-with-files.git .claude/plugins/planning-with-files
+```
+
+### Method 3: Install from Upstream (Original)
+
+```bash
 claude plugins install OthmanAdi/planning-with-files
 ```
 
-That's it! Now use one of these commands in Claude Code:
+### Windows (PowerShell)
 
-| Command | Autocomplete | Description |
-|---------|--------------|-------------|
-| `/planning-with-files:plan` | Type `/plan` | Shorter command (v2.11.0+) |
-| `/planning-with-files:start` | Type `/planning` | Original command |
-
-**Alternative:** If you want `/planning-with-files` (without prefix), copy skills to your local folder:
-
-```bash
-# Optional: Copy skills for /planning-with-files command
-cp -r ~/.claude/plugins/cache/planning-with-files/planning-with-files/*/skills/planning-with-files ~/.claude/skills/
-```
-
-**Windows (PowerShell):**
 ```powershell
-# Install the plugin
-claude plugins install OthmanAdi/planning-with-files
-
-# Optional: Copy skills for /planning-with-files command
-Copy-Item -Recurse -Path "$env:USERPROFILE\.claude\plugins\cache\planning-with-files\planning-with-files\*\skills\planning-with-files" -Destination "$env:USERPROFILE\.claude\skills\"
+git clone git@github.com:B0Qi/planning-with-files.git
+Copy-Item -Recurse -Path "planning-with-files\skills\planning-with-files" -Destination "$env:USERPROFILE\.claude\skills\"
 ```
+
+### After Installation
+
+Restart Claude Code. The skill will:
+- **Auto-activate** when starting complex tasks (>5 tool calls)
+- **Manual invoke** with `/planning-with-files`, `/plan`, or `/planning`
 
 See [docs/installation.md](docs/installation.md) for all installation methods.
 
@@ -139,15 +152,30 @@ Claude Code (and most AI agents) suffer from:
 - **Hidden errors** — Failures aren't tracked, so the same mistakes repeat
 - **Context stuffing** — Everything crammed into context instead of stored
 
-## The Solution: 3-File Pattern
+## The Solution: Multi-Task Directory Structure (B0Qi Fork)
 
-For every complex task, create THREE files:
+All planning files live in `.claude-plans/` with **per-task isolation**:
 
 ```
-task_plan.md      → Track phases and progress
-findings.md       → Store research and findings
-progress.md       → Session log and test results
+.claude-plans/                    # Hidden directory, won't pollute project
+├── index.md                      # Task index (active + history)
+├── dark-mode-toggle/             # Task 1 directory
+│   ├── plan.md                   # Task plan
+│   ├── findings.md               # Research findings
+│   └── progress.md               # Session log
+└── fix-login-bug/                # Task 2 directory
+    ├── plan.md
+    ├── findings.md
+    └── progress.md
 ```
+
+### The 3-File Pattern (Per Task)
+
+| File | Purpose | When to Update |
+|------|---------|----------------|
+| `plan.md` | Track phases and progress | After each phase |
+| `findings.md` | Store research and findings | After ANY discovery |
+| `progress.md` | Session log and test results | Throughout session |
 
 ### The Core Principle
 
