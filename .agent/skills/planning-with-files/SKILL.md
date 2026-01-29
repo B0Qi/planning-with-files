@@ -1,24 +1,14 @@
 ---
-description: Manus-style file-based planning for complex tasks. Creates task_plan.md, findings.md, and progress.md. Use for multi-step tasks, research, or anything requiring >5 tool calls.
-globs:
-alwaysApply: false
+name: planning-with-files
+description: Implements Manus-style file-based planning for complex tasks. Creates task_plan.md, findings.md, and progress.md. Use when starting complex multi-step tasks, research projects, or any task requiring >5 tool calls.
+license: MIT
 ---
 
 # Planning with Files
 
 Work like Manus: Use persistent markdown files as your "working memory on disk."
 
-## Quick Start
-
-Before ANY complex task:
-
-1. **Create `task_plan.md`** — Phase tracking and progress
-2. **Create `findings.md`** — Research and discoveries
-3. **Create `progress.md`** — Session log and test results
-4. **Re-read plan before decisions** — Refreshes goals in attention window
-5. **Update after each phase** — Mark complete, log errors
-
-## The Core Pattern
+## Core Principle
 
 ```
 Context Window = RAM (volatile, limited)
@@ -26,6 +16,16 @@ Filesystem = Disk (persistent, unlimited)
 
 → Anything important gets written to disk.
 ```
+
+## Quick Start
+
+Before ANY complex task, create these three files:
+
+1. **task_plan.md** — Track phases and progress
+2. **findings.md** — Store research and discoveries
+3. **progress.md** — Session log and test results
+
+See references/ for starting templates.
 
 ## File Purposes
 
@@ -56,14 +56,6 @@ After completing any phase:
 
 ### 5. Log ALL Errors
 Every error goes in the plan file. This builds knowledge and prevents repetition.
-
-```markdown
-## Errors Encountered
-| Error | Attempt | Resolution |
-|-------|---------|------------|
-| FileNotFoundError | 1 | Created default config |
-| API timeout | 2 | Added retry logic |
-```
 
 ### 6. Never Repeat Failures
 ```
@@ -96,43 +88,6 @@ AFTER 3 FAILURES: Escalate to User
   → Ask for guidance
 ```
 
-## Read vs Write Decision Matrix
-
-| Situation | Action | Reason |
-|-----------|--------|--------|
-| Just wrote a file | DON'T read | Content still in context |
-| Viewed image/PDF | Write findings NOW | Multimodal → text before lost |
-| Browser returned data | Write to file | Screenshots don't persist |
-| Starting new phase | Read plan/findings | Re-orient if context stale |
-| Error occurred | Read relevant file | Need current state to fix |
-| Resuming after gap | Read all planning files | Recover state |
-
-## The 5-Question Reboot Test
-
-If you can answer these, your context management is solid:
-
-| Question | Answer Source |
-|----------|---------------|
-| Where am I? | Current phase in task_plan.md |
-| Where am I going? | Remaining phases |
-| What's the goal? | Goal statement in plan |
-| What have I learned? | findings.md |
-| What have I done? | progress.md |
-
-## Manus Principles
-
-### Principle 1: Filesystem as External Memory
-Store large content in files, keep only paths in context. Agent can "look up" information when needed.
-
-### Principle 2: Attention Manipulation
-After ~50 tool calls, models forget original goals ("lost in the middle" effect). Re-reading `task_plan.md` brings goals back into the attention window.
-
-### Principle 3: Keep Failure Traces
-Keep failed actions in the plan file. The model updates its understanding when seeing failures. Error recovery is "one of the clearest signals of TRUE agentic behavior."
-
-### Principle 4: Avoid Few-Shot Overfitting
-Vary phrasings slightly. Don't copy-paste patterns blindly. Uniformity breeds fragility.
-
 ## When to Use This Pattern
 
 **Use for:**
@@ -140,20 +95,33 @@ Vary phrasings slightly. Don't copy-paste patterns blindly. Uniformity breeds fr
 - Research tasks
 - Building/creating projects
 - Tasks spanning many tool calls
-- Anything requiring organization
 
 **Skip for:**
 - Simple questions
 - Single-file edits
 - Quick lookups
 
+## Templates
+
+- references/task_plan.md — Phase tracking template
+- references/findings.md — Research storage template
+- references/progress.md — Session logging template
+
+## Advanced Topics
+
+- **Manus Principles:** See references.md for complete context engineering patterns
+- **Real Examples:** See examples.md for practical implementations
+
 ## Anti-Patterns
 
 | Don't | Do Instead |
 |-------|------------|
-| Use TodoWrite for persistence | Create task_plan.md file |
 | State goals once and forget | Re-read plan before decisions |
 | Hide errors and retry silently | Log errors to plan file |
 | Stuff everything in context | Store large content in files |
 | Start executing immediately | Create plan file FIRST |
 | Repeat failed actions | Track attempts, mutate approach |
+
+---
+
+**This pattern is why Manus went from launch to $2B acquisition in 8 months.**

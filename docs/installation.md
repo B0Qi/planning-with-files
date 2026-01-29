@@ -153,6 +153,14 @@ See [docs/windows.md](windows.md) for Windows-specific installation notes.
 
 See [docs/cursor.md](cursor.md) for Cursor IDE installation.
 
+### Codex
+
+See [docs/codex.md](codex.md) for Codex IDE installation.
+
+### OpenCode
+
+See [docs/opencode.md](opencode.md) for OpenCode IDE installation.
+
 ---
 
 ## Need Help?

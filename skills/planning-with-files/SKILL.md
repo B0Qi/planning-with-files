@@ -1,7 +1,7 @@
 ---
 name: planning-with-files
-version: "2.1.0"
-description: Implements Manus-style file-based planning with multi-task support. Uses .claude-plans/ directory with per-task isolation. Use when starting complex multi-step tasks, research projects, or any task requiring >5 tool calls.
+version: "2.13.0"
+description: Implements Manus-style file-based planning with multi-task support. Uses .claude-plans/ directory with per-task isolation. Use when starting complex multi-step tasks, research projects, or any task requiring >5 tool calls. Now with automatic session recovery after /clear.
 user-invocable: true
 allowed-tools:
   - Read
@@ -13,12 +13,8 @@ allowed-tools:
   - WebFetch
   - WebSearch
 hooks:
-  SessionStart:
-    - hooks:
-        - type: command
-          command: "echo '[planning-with-files] Ready. Auto-activates for complex tasks, or invoke manually with /planning-with-files'"
   PreToolUse:
-    - matcher: "Write|Edit|Bash"
+    - matcher: "Write|Edit|Bash|Read|Glob|Grep"
       hooks:
         - type: command
           command: "cat .claude-plans/index.md 2>/dev/null | head -20 || true"
@@ -30,12 +26,56 @@ hooks:
   Stop:
     - hooks:
         - type: command
-          command: "PLAN_FILE=\".claude-plans/index.md\"; [ ! -f \"$PLAN_FILE\" ] && exit 0; echo '=== Task Index ==='; cat \"$PLAN_FILE\" | head -20; exit 0"
+          command: |
+            SCRIPT_DIR="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/planning-with-files}/scripts"
+
+            IS_WINDOWS=0
+            if [ "${OS-}" = "Windows_NT" ]; then
+              IS_WINDOWS=1
+            else
+              UNAME_S="$(uname -s 2>/dev/null || echo '')"
+              case "$UNAME_S" in
+                CYGWIN*|MINGW*|MSYS*) IS_WINDOWS=1 ;;
+              esac
+            fi
+
+            if [ "$IS_WINDOWS" -eq 1 ]; then
+              if command -v pwsh >/dev/null 2>&1; then
+                pwsh -ExecutionPolicy Bypass -File "$SCRIPT_DIR/check-complete.ps1" 2>/dev/null ||
+                powershell -ExecutionPolicy Bypass -File "$SCRIPT_DIR/check-complete.ps1" 2>/dev/null ||
+                sh "$SCRIPT_DIR/check-complete.sh"
+              else
+                powershell -ExecutionPolicy Bypass -File "$SCRIPT_DIR/check-complete.ps1" 2>/dev/null ||
+                sh "$SCRIPT_DIR/check-complete.sh"
+              fi
+            else
+              sh "$SCRIPT_DIR/check-complete.sh"
+            fi
 ---
 
 # Planning with Files
 
 Work like Manus: Use persistent markdown files as your "working memory on disk."
+
+## FIRST: Check for Previous Session (v2.2.0)
+
+**Before starting work**, check for unsynced context from a previous session:
+
+```bash
+# Linux/macOS
+$(command -v python3 || command -v python) ${CLAUDE_PLUGIN_ROOT}/scripts/session-catchup.py "$(pwd)"
+```
+
+```powershell
+# Windows PowerShell
+& (Get-Command python -ErrorAction SilentlyContinue).Source "$env:USERPROFILE\.claude\skills\planning-with-files\scripts\session-catchup.py" (Get-Location)
+```
+
+If catchup report shows unsynced context:
+1. Run `git diff --stat` to see actual code changes
+2. Read current planning files in `.claude-plans/`
+3. Update planning files based on catchup + git diff
+4. Then proceed with task
 
 ## Directory Structure
 
@@ -65,7 +105,7 @@ Before ANY complex task:
 5. **Update after each phase** — Mark complete, log errors
 6. **Update index.md** — When switching or completing tasks
 
-Or invoke manually with `/planning-with-files`.
+Or invoke manually with `/planning-with-files` or `/plan`.
 
 ## The Core Pattern
 
@@ -110,44 +150,6 @@ Create this file FIRST in `.claude-plans/`:
 | Refactor auth module | `refactor-auth/` | 2025-01-07 |
 ```
 
-## plan.md Template
-
-Create this file in each task directory:
-
-```markdown
-# Task: [Brief Description]
-
-## Goal
-[One sentence describing the end state]
-
-## Current Phase
-Phase 1
-
-## Phases
-
-### Phase 1: Requirements & Discovery
-- [ ] Understand user intent
-- [ ] Identify constraints
-- **Status:** in_progress
-
-### Phase 2: Implementation
-- [ ] Execute the plan
-- **Status:** pending
-
-### Phase 3: Testing & Delivery
-- [ ] Verify requirements met
-- [ ] Deliver to user
-- **Status:** pending
-
-## Decisions Made
-| Decision | Rationale |
-|----------|-----------|
-
-## Errors Encountered
-| Error | Attempt | Resolution |
-|-------|---------|------------|
-```
-
 ## Critical Rules
 
 ### 1. Use .claude-plans/ Directory
@@ -164,8 +166,6 @@ Never start a complex task without creating the task directory and `plan.md`.
 
 ### 5. The 2-Action Rule
 > "After every 2 view/browser/search operations, IMMEDIATELY save key findings to text files."
-
-This prevents visual/multimodal information from being lost.
 
 ### 6. Read Before Decide
 Before major decisions, read the plan file. This keeps goals in your attention window.
@@ -184,7 +184,6 @@ Every error goes in the plan file. This builds knowledge and prevents repetition
 if action_failed:
     next_action != same_action
 ```
-Track what you tried. Mutate the approach.
 
 ## The 3-Strike Error Protocol
 
@@ -196,7 +195,6 @@ ATTEMPT 1: Diagnose & Fix
 
 ATTEMPT 2: Alternative Approach
   → Same error? Try different method
-  → Different tool? Different library?
   → NEVER repeat exact same failing action
 
 ATTEMPT 3: Broader Rethink
@@ -205,37 +203,9 @@ ATTEMPT 3: Broader Rethink
   → Consider updating the plan
 
 AFTER 3 FAILURES: Escalate to User
-  → Explain what you tried
-  → Share the specific error
-  → Ask for guidance
 ```
 
-## Read vs Write Decision Matrix
-
-| Situation | Action | Reason |
-|-----------|--------|--------|
-| Just wrote a file | DON'T read | Content still in context |
-| Viewed image/PDF | Write findings NOW | Multimodal → text before lost |
-| Browser returned data | Write to file | Screenshots don't persist |
-| Starting new phase | Read plan/findings | Re-orient if context stale |
-| Error occurred | Read relevant file | Need current state to fix |
-| Resuming after gap | Read index.md first | Recover task context |
-
-## The 5-Question Reboot Test
-
-If you can answer these, your context management is solid:
-
-| Question | Answer Source |
-|----------|---------------|
-| Where am I? | Current phase in plan.md |
-| Where am I going? | Remaining phases |
-| What's the goal? | Goal statement in plan |
-| What have I learned? | findings.md |
-| What have I done? | progress.md |
-
 ## Switching Between Tasks
-
-When user switches context or asks about a different task:
 
 ```bash
 # 1. Read index to see all tasks
@@ -250,17 +220,12 @@ Edit .claude-plans/index.md
 
 ## Context Recovery After Session Reset
 
-When starting a new session:
-
 ```bash
 # 1. Check if plans exist
 Read .claude-plans/index.md
 
-# 2. See current focus from index
-# 3. Resume that task
+# 2. Resume from current focus
 Read .claude-plans/[active-task]/plan.md
-
-# 4. Continue from last status
 ```
 
 ## When to Use This Pattern
@@ -271,7 +236,6 @@ Read .claude-plans/[active-task]/plan.md
 - Building/creating projects
 - Tasks spanning many tool calls
 - Multiple concurrent tasks
-- Anything requiring organization
 
 **Skip for:**
 - Simple questions
@@ -280,18 +244,15 @@ Read .claude-plans/[active-task]/plan.md
 
 ## Templates
 
-Copy these templates to start:
-
 - [templates/task_plan.md](templates/task_plan.md) — Phase tracking
 - [templates/findings.md](templates/findings.md) — Research storage
 - [templates/progress.md](templates/progress.md) — Session logging
 
 ## Scripts
 
-Helper scripts for automation:
-
-- `scripts/init-session.sh` — Initialize all planning files
-- `scripts/check-complete.sh` — Verify all phases complete
+- `scripts/init-session.sh` — Initialize planning files
+- `scripts/check-complete.sh` — Verify phases complete
+- `scripts/session-catchup.py` — Recover context from previous session
 
 ## Advanced Topics
 
@@ -308,6 +269,4 @@ Helper scripts for automation:
 | Use TodoWrite for persistence | Create plan files |
 | State goals once and forget | Re-read plan before decisions |
 | Hide errors and retry silently | Log errors to plan file |
-| Stuff everything in context | Store large content in files |
-| Start executing immediately | Create plan file FIRST |
 | Repeat failed actions | Track attempts, mutate approach |
