@@ -18,10 +18,11 @@ A Claude Code plugin that transforms your workflow to use persistent markdown fi
 [![Cursor Skills](https://img.shields.io/badge/Cursor-Skills-purple)](https://docs.cursor.com/context/skills)
 [![Kilocode Skills](https://img.shields.io/badge/Kilocode-Skills-orange)](https://kilo.ai/docs/agent-behavior/skills)
 [![Gemini CLI](https://img.shields.io/badge/Gemini%20CLI-Skills-4285F4)](https://geminicli.com/docs/cli/skills/)
-[![Moltbot](https://img.shields.io/badge/Moltbot-Skills-FF6B6B)](https://docs.molt.bot/tools/skills)
+[![OpenClaw](https://img.shields.io/badge/OpenClaw-Skills-FF6B6B)](https://openclaw.ai)
 [![Kiro](https://img.shields.io/badge/Kiro-Steering-00D4AA)](https://kiro.dev/docs/cli/steering/)
 [![AdaL CLI](https://img.shields.io/badge/AdaL%20CLI-Skills-9B59B6)](https://docs.sylph.ai/features/plugins-and-skills)
-[![Version](https://img.shields.io/badge/version-2.13.0-brightgreen)](https://github.com/B0Qi/planning-with-files/releases)
+[![Pi Agent](https://img.shields.io/badge/Pi%20Agent-Skills-FF4081)](https://pi.dev)
+[![Version](https://img.shields.io/badge/version-2.14.0-brightgreen)](https://github.com/B0Qi/planning-with-files/releases)
 [![SkillCheck Validated](https://img.shields.io/badge/SkillCheck-Validated-4c1)](https://getskillcheck.com)
 
 ## Quick Install
@@ -75,7 +76,7 @@ See [docs/installation.md](docs/installation.md) for all installation methods.
 |-----|--------|-------------------|--------|
 | Claude Code | ✅ Full Support | [Installation](docs/installation.md) | Plugin + SKILL.md |
 | Gemini CLI | ✅ Full Support | [Gemini Setup](docs/gemini.md) | Agent Skills |
-| Moltbot | ✅ Full Support | [Moltbot Setup](docs/moltbot.md) | Workspace/Local Skills |
+| OpenClaw | ✅ Full Support | [OpenClaw Setup](docs/openclaw.md) | Workspace/Local Skills |
 | Kiro | ✅ Full Support | [Kiro Setup](docs/kiro.md) | Steering Files |
 | Cursor | ✅ Full Support | [Cursor Setup](docs/cursor.md) | Skills |
 | Continue | ✅ Full Support | [Continue Setup](docs/continue.md) | Skills + Prompt files |
@@ -86,6 +87,7 @@ See [docs/installation.md](docs/installation.md) for all installation methods.
 | Antigravity | ✅ Full Support | [Antigravity Setup](docs/antigravity.md) | Workspace/Personal Skill |
 | CodeBuddy | ✅ Full Support | [CodeBuddy Setup](docs/codebuddy.md) | Workspace/Personal Skill |
 | AdaL CLI (Sylph AI) | ✅ Full Support | [AdaL Setup](docs/adal.md) | Personal/Project Skills |
+| Pi Agent | ✅ Full Support | [Pi Agent Setup](docs/pi-agent.md) | NPM Skill Package |
 
 > **Note:** If your IDE uses the legacy Rules system instead of Skills, see the [`legacy-rules-support`](https://github.com/OthmanAdi/planning-with-files/tree/legacy-rules-support) branch.
 
@@ -98,7 +100,7 @@ See [docs/installation.md](docs/installation.md) for all installation methods.
 | [Workflow Diagram](docs/workflow.md) | Visual diagram of how files and hooks interact |
 | [Troubleshooting](docs/troubleshooting.md) | Common issues and solutions |
 | [Gemini CLI Setup](docs/gemini.md) | Google Gemini CLI integration guide |
-| [Moltbot Setup](docs/moltbot.md) | Moltbot integration guide |
+| [OpenClaw Setup](docs/openclaw.md) | OpenClaw integration guide |
 | [Kiro Setup](docs/kiro.md) | Kiro steering files integration |
 | [Cursor Setup](docs/cursor.md) | Cursor IDE-specific instructions |
 | [Continue Setup](docs/continue.md) | Continue integration guide (skills + slash prompt) |
@@ -110,12 +112,14 @@ See [docs/installation.md](docs/installation.md) for all installation methods.
 | [Antigravity Setup](docs/antigravity.md) | Antigravity IDE integration guide |
 | [CodeBuddy Setup](docs/codebuddy.md) | CodeBuddy IDE integration guide |
 | [AdaL CLI Setup](docs/adal.md) | AdaL CLI / Sylph AI integration guide |
+| [Pi Agent Setup](docs/pi-agent.md) | Pi Agent integration guide |
 
 ## Versions
 
 | Version | Features | Install |
 |---------|----------|---------|
-| **v2.13.0** (current) | Moltbot rebrand (formerly Clawd CLI) | `claude plugins install OthmanAdi/planning-with-files` |
+| **v2.14.0** (current) | Pi Agent support, OpenClaw docs rename, Codex path fixes | `claude plugins install OthmanAdi/planning-with-files` |
+| **v2.13.0** | Moltbot rebrand (formerly Clawd CLI) | See [releases](https://github.com/OthmanAdi/planning-with-files/releases) |
 | **v2.12.0** | AdaL CLI / Sylph AI support | See [releases](https://github.com/OthmanAdi/planning-with-files/releases) |
 | **v2.11.0** | `/plan` command for easier autocomplete | See [releases](https://github.com/OthmanAdi/planning-with-files/releases) |
 | **v2.10.0** | Kiro steering files support | See [releases](https://github.com/OthmanAdi/planning-with-files/releases) |

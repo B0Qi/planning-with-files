@@ -49,6 +49,13 @@ $COMPLETE = ([regex]::Matches($content, "\*\*Status:\*\* complete")).Count
 $IN_PROGRESS = ([regex]::Matches($content, "\*\*Status:\*\* in_progress")).Count
 $PENDING = ([regex]::Matches($content, "\*\*Status:\*\* pending")).Count
 
+# Fallback: support inline phase markers like [complete], [in_progress], [pending]
+if ($COMPLETE -eq 0 -and $IN_PROGRESS -eq 0 -and $PENDING -eq 0) {
+    $COMPLETE = ([regex]::Matches($content, "\[complete\]")).Count
+    $IN_PROGRESS = ([regex]::Matches($content, "\[in_progress\]")).Count
+    $PENDING = ([regex]::Matches($content, "\[pending\]")).Count
+}
+
 Write-Host "Total phases:   $TOTAL"
 Write-Host "Complete:       $COMPLETE"
 Write-Host "In progress:    $IN_PROGRESS"
