@@ -4,19 +4,43 @@
 
 **User Request:** "Research the benefits of morning exercise and write a summary"
 
-### Loop 1: Create Plan
+### Loop 1: Create Index and Plan
+
 ```bash
-Write task_plan.md
+# Check if index exists
+Read .codex-plans/index.md  # Not found
+
+# Create index and task directory
+Write .codex-plans/index.md
+Write .codex-plans/morning-exercise-research/plan.md
 ```
 
+**.codex-plans/index.md:**
 ```markdown
-# Task Plan: Morning Exercise Benefits Research
+# Task Index
+
+## Active Tasks
+
+| Task | Directory | Status | Started |
+|------|-----------|--------|---------|
+| Morning exercise research | `morning-exercise-research/` | Phase 1/4 | 2025-01-09 |
+
+## Current Focus
+`morning-exercise-research/` - Creating plan
+
+## Completed Tasks
+(none yet)
+```
+
+**.codex-plans/morning-exercise-research/plan.md:**
+```markdown
+# Task: Morning Exercise Benefits Research
 
 ## Goal
 Create a research summary on the benefits of morning exercise.
 
 ## Phases
-- [ ] Phase 1: Create this plan ✓
+- [x] Phase 1: Create this plan
 - [ ] Phase 2: Search and gather sources
 - [ ] Phase 3: Synthesize findings
 - [ ] Phase 4: Deliver summary
@@ -31,25 +55,29 @@ Create a research summary on the benefits of morning exercise.
 ```
 
 ### Loop 2: Research
+
 ```bash
-Read task_plan.md           # Refresh goals
+Read .codex-plans/morning-exercise-research/plan.md   # Refresh goals
 WebSearch "morning exercise benefits"
-Write notes.md              # Store findings
-Edit task_plan.md           # Mark Phase 2 complete
+Write .codex-plans/morning-exercise-research/findings.md  # Store findings
+Edit .codex-plans/morning-exercise-research/plan.md   # Mark Phase 2 complete
 ```
 
 ### Loop 3: Synthesize
+
 ```bash
-Read task_plan.md           # Refresh goals
-Read notes.md               # Get findings
-Write morning_exercise_summary.md
-Edit task_plan.md           # Mark Phase 3 complete
+Read .codex-plans/morning-exercise-research/plan.md   # Refresh goals
+Read .codex-plans/morning-exercise-research/findings.md  # Get findings
+Write .codex-plans/morning-exercise-research/deliverable.md
+Edit .codex-plans/morning-exercise-research/plan.md   # Mark Phase 3 complete
 ```
 
 ### Loop 4: Deliver
+
 ```bash
-Read task_plan.md           # Verify complete
-Deliver morning_exercise_summary.md
+Read .codex-plans/morning-exercise-research/plan.md   # Verify complete
+Edit .codex-plans/index.md                            # Move to completed
+Deliver .codex-plans/morning-exercise-research/deliverable.md
 ```
 
 ---
@@ -58,16 +86,36 @@ Deliver morning_exercise_summary.md
 
 **User Request:** "Fix the login bug in the authentication module"
 
-### task_plan.md
+### .codex-plans/index.md
 ```markdown
-# Task Plan: Fix Login Bug
+# Task Index
+
+## Active Tasks
+
+| Task | Directory | Status | Started |
+|------|-----------|--------|---------|
+| Fix login bug | `fix-login-bug/` | Phase 3/5 | 2025-01-09 |
+
+## Current Focus
+`fix-login-bug/` - Identifying root cause
+
+## Completed Tasks
+
+| Task | Directory | Completed |
+|------|-----------|-----------|
+| Morning exercise research | `morning-exercise-research/` | 2025-01-09 |
+```
+
+### .codex-plans/fix-login-bug/plan.md
+```markdown
+# Task: Fix Login Bug
 
 ## Goal
 Identify and fix the bug preventing successful login.
 
 ## Phases
-- [x] Phase 1: Understand the bug report ✓
-- [x] Phase 2: Locate relevant code ✓
+- [x] Phase 1: Understand the bug report
+- [x] Phase 2: Locate relevant code
 - [ ] Phase 3: Identify root cause (CURRENT)
 - [ ] Phase 4: Implement fix
 - [ ] Phase 5: Test and verify
@@ -91,22 +139,42 @@ Identify and fix the bug preventing successful login.
 
 ---
 
-## Example 3: Feature Development
+## Example 3: Feature Development with Multiple Tasks
 
 **User Request:** "Add a dark mode toggle to the settings page"
 
-### The 3-File Pattern in Action
-
-**task_plan.md:**
+### .codex-plans/index.md (showing multiple tasks)
 ```markdown
-# Task Plan: Dark Mode Toggle
+# Task Index
+
+## Active Tasks
+
+| Task | Directory | Status | Started |
+|------|-----------|--------|---------|
+| Dark mode toggle | `dark-mode-toggle/` | Phase 3/5 | 2025-01-08 |
+| Fix login bug | `fix-login-bug/` | Phase 4/5 | 2025-01-09 |
+
+## Current Focus
+`dark-mode-toggle/` - Building toggle component
+
+## Completed Tasks
+
+| Task | Directory | Completed |
+|------|-----------|-----------|
+| Morning exercise research | `morning-exercise-research/` | 2025-01-09 |
+| Refactor auth module | `refactor-auth/` | 2025-01-07 |
+```
+
+### .codex-plans/dark-mode-toggle/plan.md
+```markdown
+# Task: Dark Mode Toggle
 
 ## Goal
 Add functional dark mode toggle to settings.
 
 ## Phases
-- [x] Phase 1: Research existing theme system ✓
-- [x] Phase 2: Design implementation approach ✓
+- [x] Phase 1: Research existing theme system
+- [x] Phase 2: Design implementation approach
 - [ ] Phase 3: Implement toggle component (CURRENT)
 - [ ] Phase 4: Add theme switching logic
 - [ ] Phase 5: Test and polish
@@ -120,7 +188,7 @@ Add functional dark mode toggle to settings.
 **Currently in Phase 3** - Building toggle component
 ```
 
-**notes.md:**
+### .codex-plans/dark-mode-toggle/findings.md
 ```markdown
 # Notes: Dark Mode Implementation
 
@@ -141,24 +209,46 @@ Add functional dark mode toggle to settings.
 - Dark text: #eaeaea
 ```
 
-**dark_mode_implementation.md:** (deliverable)
+---
+
+## Example 4: Switching Between Tasks
+
+**User says:** "Actually, let's finish the login bug first"
+
+### Workflow
+```bash
+# 1. Read index to see all tasks
+Read .codex-plans/index.md
+
+# 2. Switch to login bug task
+Read .codex-plans/fix-login-bug/plan.md
+
+# 3. Update index's Current Focus
+Edit .codex-plans/index.md
+# Change: Current Focus → `fix-login-bug/` - Implementing fix
+```
+
+### Updated .codex-plans/index.md
 ```markdown
-# Dark Mode Implementation
+# Task Index
 
-## Changes Made
+## Active Tasks
 
-### 1. Added dark theme colors
-File: src/styles/theme.ts
-...
+| Task | Directory | Status | Started |
+|------|-----------|--------|---------|
+| Dark mode toggle | `dark-mode-toggle/` | Phase 3/5 | 2025-01-08 |
+| Fix login bug | `fix-login-bug/` | Phase 4/5 | 2025-01-09 |
 
-### 2. Created useTheme hook
-File: src/hooks/useTheme.ts
+## Current Focus
+`fix-login-bug/` - Implementing fix    ← CHANGED
+
+## Completed Tasks
 ...
 ```
 
 ---
 
-## Example 4: Error Recovery Pattern
+## Example 5: Error Recovery Pattern
 
 When something fails, DON'T hide it:
 
@@ -175,13 +265,39 @@ Action: Read config.json  # Another retry
 Action: Read config.json
 Error: File not found
 
-# Update task_plan.md:
+# Update .codex-plans/[task]/plan.md:
 ## Errors Encountered
 - config.json not found → Will create default config
 
 Action: Write config.json (default config)
 Action: Read config.json
 Success!
+```
+
+---
+
+## Example 6: Context Recovery After Session Reset
+
+**New session starts, user says:** "Continue working on my tasks"
+
+### Workflow
+```bash
+# 1. Check if plans exist
+Read .codex-plans/index.md
+
+# Output shows:
+# - Active: dark-mode-toggle (Phase 3/5), fix-login-bug (Phase 4/5)
+# - Current Focus: fix-login-bug
+
+# 2. Resume the active task
+Read .codex-plans/fix-login-bug/plan.md
+
+# Now I know:
+# - Goal: Fix login bug
+# - Currently in Phase 4: Implement fix
+# - Root cause: user object not awaited
+
+# 3. Continue from where we left off
 ```
 
 ---
@@ -195,8 +311,30 @@ Success!
 [Context is getting long...]
 [Original goal might be forgotten...]
 
-→ Read task_plan.md          # This brings goals back into attention!
-→ Now make the decision       # Goals are fresh in context
+→ Read .codex-plans/[task]/plan.md    # This brings goals back into attention!
+→ Now make the decision                 # Goals are fresh in context
 ```
 
 This is why Manus can handle ~50 tool calls without losing track. The plan file acts as a "goal refresh" mechanism.
+
+---
+
+## Directory Structure Summary
+
+```
+.codex-plans/
+├── index.md                          # Always read first
+├── morning-exercise-research/        # Completed task (kept for reference)
+│   ├── plan.md
+│   ├── notes.md
+│   └── deliverable.md
+├── fix-login-bug/                    # Active task
+│   ├── plan.md
+│   └── notes.md
+├── dark-mode-toggle/                 # Active task (paused)
+│   ├── plan.md
+│   └── notes.md
+└── refactor-auth/                    # Completed task
+    ├── plan.md
+    └── deliverable.md
+```

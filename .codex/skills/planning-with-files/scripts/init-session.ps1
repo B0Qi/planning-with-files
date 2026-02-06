@@ -1,18 +1,70 @@
-# Initialize planning files for a new session
-# Usage: .\init-session.ps1 [project-name]
+# Initialize .codex-plans and one task directory.
+# Usage: .\init-session.ps1 [task-slug] [task-title]
 
 param(
-    [string]$ProjectName = "project"
+    [string]$TaskSlug = "",
+    [string]$TaskTitle = ""
 )
 
-$DATE = Get-Date -Format "yyyy-MM-dd"
+$Date = Get-Date -Format "yyyy-MM-dd"
+if ([string]::IsNullOrWhiteSpace($TaskSlug)) {
+    $TaskSlug = "task-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+}
+if ([string]::IsNullOrWhiteSpace($TaskTitle)) {
+    $TaskTitle = $TaskSlug
+}
 
-Write-Host "Initializing planning files for: $ProjectName"
+$BaseDir = ".codex-plans"
+$TaskDir = Join-Path $BaseDir $TaskSlug
+$IndexFile = Join-Path $BaseDir "index.md"
 
-# Create task_plan.md if it doesn't exist
-if (-not (Test-Path "task_plan.md")) {
-    @"
-# Task Plan: [Brief Description]
+New-Item -ItemType Directory -Force -Path $TaskDir | Out-Null
+
+if (-not (Test-Path $IndexFile)) {
+@"
+# Task Index
+
+## Active Tasks
+
+| Task | Directory | Status | Started |
+|------|-----------|--------|---------|
+| $TaskTitle | ``$TaskSlug/`` | Phase 1/5 | $Date |
+
+## Current Focus
+``$TaskSlug/`` - $TaskTitle
+
+## Completed Tasks
+
+| Task | Directory | Completed |
+|------|-----------|-----------|
+"@ | Out-File -FilePath $IndexFile -Encoding UTF8
+    Write-Host "Created $IndexFile"
+}
+else {
+    $content = Get-Content $IndexFile -Raw
+    $taskRef = "``$TaskSlug/``"
+
+    if ($content -notmatch [regex]::Escape($taskRef)) {
+        $row = "| $TaskTitle | $taskRef | Phase 1/5 | $Date |"
+        $content = $content -replace "\|------\|-----------\|--------\|---------\|", "|------|-----------|--------|---------|`n$row"
+    }
+
+    $focusLine = "$taskRef - $TaskTitle"
+    if ($content -match "## Current Focus\r?\n") {
+        $content = [regex]::Replace($content, "## Current Focus\r?\n.*", "## Current Focus`n$focusLine")
+    }
+    else {
+        $content += "`n`n## Current Focus`n$focusLine`n"
+    }
+
+    $content | Out-File -FilePath $IndexFile -Encoding UTF8
+    Write-Host "Updated $IndexFile"
+}
+
+$planFile = Join-Path $TaskDir "plan.md"
+if (-not (Test-Path $planFile)) {
+@"
+# Task: [Brief Description]
 
 ## Goal
 [One sentence describing the end state]
@@ -22,25 +74,25 @@ Phase 1
 
 ## Phases
 
-### Phase 1: Requirements & Discovery
+### Phase 1: Requirements and Discovery
 - [ ] Understand user intent
 - [ ] Identify constraints
-- [ ] Document in findings.md
+- [ ] Document findings in findings.md
 - **Status:** in_progress
 
-### Phase 2: Planning & Structure
+### Phase 2: Planning and Structure
 - [ ] Define approach
-- [ ] Create project structure
+- [ ] Create structure
 - **Status:** pending
 
 ### Phase 3: Implementation
-- [ ] Execute the plan
-- [ ] Write to files before executing
+- [ ] Execute plan
+- [ ] Validate incrementally
 - **Status:** pending
 
-### Phase 4: Testing & Verification
+### Phase 4: Testing and Verification
 - [ ] Verify requirements met
-- [ ] Document test results
+- [ ] Document test results in progress.md
 - **Status:** pending
 
 ### Phase 5: Delivery
@@ -51,20 +103,20 @@ Phase 1
 ## Decisions Made
 | Decision | Rationale |
 |----------|-----------|
+|          |           |
 
 ## Errors Encountered
-| Error | Resolution |
-|-------|------------|
-"@ | Out-File -FilePath "task_plan.md" -Encoding UTF8
-    Write-Host "Created task_plan.md"
-} else {
-    Write-Host "task_plan.md already exists, skipping"
+| Error | Attempt | Resolution |
+|-------|---------|------------|
+|       | 1       |            |
+"@ | Out-File -FilePath $planFile -Encoding UTF8
+    Write-Host "Created $planFile"
 }
 
-# Create findings.md if it doesn't exist
-if (-not (Test-Path "findings.md")) {
-    @"
-# Findings & Decisions
+$findingsFile = Join-Path $TaskDir "findings.md"
+if (-not (Test-Path $findingsFile)) {
+@"
+# Findings and Decisions
 
 ## Requirements
 -
@@ -75,29 +127,29 @@ if (-not (Test-Path "findings.md")) {
 ## Technical Decisions
 | Decision | Rationale |
 |----------|-----------|
+|          |           |
 
 ## Issues Encountered
 | Issue | Resolution |
 |-------|------------|
+|       |            |
 
 ## Resources
 -
-"@ | Out-File -FilePath "findings.md" -Encoding UTF8
-    Write-Host "Created findings.md"
-} else {
-    Write-Host "findings.md already exists, skipping"
+"@ | Out-File -FilePath $findingsFile -Encoding UTF8
+    Write-Host "Created $findingsFile"
 }
 
-# Create progress.md if it doesn't exist
-if (-not (Test-Path "progress.md")) {
-    @"
+$progressFile = Join-Path $TaskDir "progress.md"
+if (-not (Test-Path $progressFile)) {
+@"
 # Progress Log
 
-## Session: $DATE
+## Session: $Date
 
 ### Current Status
-- **Phase:** 1 - Requirements & Discovery
-- **Started:** $DATE
+- **Phase:** 1 - Requirements and Discovery
+- **Started:** $Date
 
 ### Actions Taken
 -
@@ -109,12 +161,10 @@ if (-not (Test-Path "progress.md")) {
 ### Errors
 | Error | Resolution |
 |-------|------------|
-"@ | Out-File -FilePath "progress.md" -Encoding UTF8
-    Write-Host "Created progress.md"
-} else {
-    Write-Host "progress.md already exists, skipping"
+"@ | Out-File -FilePath $progressFile -Encoding UTF8
+    Write-Host "Created $progressFile"
 }
 
 Write-Host ""
-Write-Host "Planning files initialized!"
-Write-Host "Files: task_plan.md, findings.md, progress.md"
+Write-Host "Planning files initialized in $TaskDir"
+Write-Host "Files: $IndexFile, $planFile, $findingsFile, $progressFile"

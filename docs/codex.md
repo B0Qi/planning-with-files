@@ -2,51 +2,50 @@
 
 ## Overview
 
-planning-with-files works with Codex as a personal skill in `~/.codex/skills/`.
+`planning-with-files` works with Codex as a personal skill in `~/.codex/skills/planning-with-files/`.
 
-## Installation
+This fork uses a multi-task planning layout in `.codex-plans/`.
 
-See [.codex/INSTALL.md](../.codex/INSTALL.md) for detailed installation instructions.
-
-### Quick Install
+## Quick Install
 
 ```bash
-mkdir -p ~/.codex/skills
-cd ~/.codex/skills
-git clone https://github.com/OthmanAdi/planning-with-files.git
+mkdir -p ~/.codex/skills/planning-with-files
+cp -r .codex/skills/planning-with-files/* ~/.codex/skills/planning-with-files/
 ```
 
-## Usage with Superpowers
-
-If you have [obra/superpowers](https://github.com/obra/superpowers) installed:
+Or install directly from GitHub with Codex skill installer:
 
 ```bash
-~/.codex/superpowers/.codex/superpowers-codex use-skill planning-with-files
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo B0Qi/planning-with-files \
+  --path .codex/skills/planning-with-files
 ```
 
-## Usage without Superpowers
+## Usage
 
-Add to your `~/.codex/AGENTS.md`:
+Invoke in Codex with:
 
-```markdown
-## Planning with Files
-
-<IMPORTANT>
-For complex tasks (3+ steps, research, projects):
-1. Read skill: `cat ~/.codex/skills/planning-with-files/planning-with-files/SKILL.md`
-2. Create task_plan.md, findings.md, progress.md in your project directory
-3. Follow 3-file pattern throughout the task
-</IMPORTANT>
+```text
+$planning-with-files
 ```
+
+For complex tasks:
+1. Read `~/.codex/skills/planning-with-files/SKILL.md`.
+2. Create and maintain `.codex-plans/index.md`.
+3. Track each task in `.codex-plans/<task-slug>/` using `plan.md`, `findings.md`, `progress.md`.
 
 ## Verification
 
 ```bash
-ls -la ~/.codex/skills/planning-with-files/planning-with-files/SKILL.md
+ls -la ~/.codex/skills/planning-with-files/SKILL.md
 ```
 
-## Learn More
+## Optional Helpers
 
-- [Installation Guide](installation.md)
-- [Quick Start](quickstart.md)
-- [Workflow Diagram](workflow.md)
+```bash
+# Initialize a task plan structure
+~/.codex/skills/planning-with-files/scripts/init-session.sh my-task "My Task"
+
+# Check completion status
+~/.codex/skills/planning-with-files/scripts/check-complete.sh
+```

@@ -13,18 +13,24 @@ import sys
 import os
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
-from datetime import datetime
 
-PLANNING_FILES = ['task_plan.md', 'progress.md', 'findings.md']
+PLANNING_FILES = ['task_plan.md', 'plan.md', 'progress.md', 'findings.md']
 
 
-def get_project_dir(project_path: str) -> Path:
-    """Convert project path to Claude's storage path format."""
+def get_project_dirs(project_path: str) -> List[Path]:
+    """Convert project path to likely session storage paths."""
     sanitized = project_path.replace('/', '-')
     if not sanitized.startswith('-'):
         sanitized = '-' + sanitized
     sanitized = sanitized.replace('_', '-')
-    return Path.home() / '.claude' / 'projects' / sanitized
+    dirs = [
+        Path.home() / '.codex' / 'projects' / sanitized,
+        Path.home() / '.claude' / 'projects' / sanitized,
+    ]
+    custom_dir = os.environ.get('PLANNING_WITH_FILES_PROJECTS_DIR')
+    if custom_dir:
+        dirs.insert(0, Path(custom_dir) / sanitized)
+    return dirs
 
 
 def get_sessions_sorted(project_dir: Path) -> List[Path]:
@@ -140,15 +146,14 @@ def extract_messages_after(messages: List[Dict], after_line: int) -> List[Dict]:
 
 def main():
     project_path = sys.argv[1] if len(sys.argv) > 1 else os.getcwd()
-    project_dir = get_project_dir(project_path)
+    project_dirs = get_project_dirs(project_path)
 
-    # Check if planning files exist (indicates active task)
-    has_planning_files = any(
-        Path(project_path, f).exists() for f in PLANNING_FILES
-    )
-
-    if not project_dir.exists():
-        # No previous sessions, nothing to catch up on
+    project_dir = None
+    for candidate in project_dirs:
+        if candidate.exists():
+            project_dir = candidate
+            break
+    if project_dir is None:
         return
 
     sessions = get_sessions_sorted(project_dir)
@@ -193,13 +198,13 @@ def main():
             print(f"USER: {msg['content'][:300]}")
         else:
             if msg.get('content'):
-                print(f"CLAUDE: {msg['content'][:300]}")
+                print(f"ASSISTANT: {msg['content'][:300]}")
             if msg.get('tools'):
                 print(f"  Tools: {', '.join(msg['tools'][:4])}")
 
     print("\n--- RECOMMENDED ---")
     print("1. Run: git diff --stat")
-    print("2. Read: task_plan.md, progress.md, findings.md")
+    print("2. Read: .codex-plans/index.md and active plan.md/findings.md/progress.md")
     print("3. Update planning files based on above context")
     print("4. Continue with task")
 
